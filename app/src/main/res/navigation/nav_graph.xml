@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/countryListFragment">
+
+    <fragment
+        android:id="@+id/countryListFragment"
+        android:name="com.example.certificationdevspaceapp.presentation.ui.CountryListFragment"
+        android:label="CountryListFragment" >
+        <action
+            android:id="@+id/action_countryListFragment_to_countryDetailFragment"
+            app:destination="@id/countryDetailFragment" />
+        <action
+            android:id="@+id/action_countryListFragment_to_favoritesListFragment"
+            app:destination="@id/favoritesListFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/countryDetailFragment"
+        android:name="com.example.certificationdevspaceapp.presentation.ui.CountryDetailFragment"
+        android:label="CountryDetailFragment" >
+
+        <argument
+            android:name="code"
+            app:argType="string" />
+
+        <action
+            android:id="@+id/action_countryDetailFragment_to_countryListFragment"
+            app:destination="@id/countryListFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/favoritesListFragment"
+        android:name="com.example.certificationdevspaceapp.presentation.ui.FavoritesListFragment"
+        android:label="FavoritesListFragment" >
+        <action
+            android:id="@+id/action_favoritesListFragment_to_countryDetailFragment"
+            app:destination="@id/countryDetailFragment" />
+        <action
+            android:id="@+id/action_favoritesListFragment_to_countryListFragment"
+            app:destination="@id/countryListFragment" />
+    </fragment>
+</navigation>

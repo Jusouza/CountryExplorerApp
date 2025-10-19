@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Country Explorer App</string>
+    <string name="hint_country_search">Search the country</string>
+    <string name="title_favorite">Favorites countries</string>
+    <string name="title_detail">Detail country</string>
+    <string name="label_capital">Capital</string>
+    <string name="label_population">Population</string>
+    <string name="label_language">Language</string>
+    <string name="label_currency">Currency</string>
+</resources>
