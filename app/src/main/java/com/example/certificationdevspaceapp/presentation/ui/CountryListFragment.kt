@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -40,6 +41,7 @@ class CountryListFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupRecycler()
+        setupSearchBar()
         goToFavoritesList()
         setupViewModel()
         observeUiState()
@@ -76,9 +78,7 @@ class CountryListFragment: Fragment() {
     }
 
     private fun observeUiState() {
-        viewModel.countries.observe(viewLifecycleOwner) { countries ->
-            Log.d("FRAGMENT", "Recycler received ${countries.size} items")
-
+        viewModel.filteredCountries.observe(viewLifecycleOwner) { countries ->
             adapter.submitList(countries)
         }
 
@@ -91,6 +91,23 @@ class CountryListFragment: Fragment() {
                 Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun setupSearchBar() {
+        val searchView = binding.searchView
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                searchView.clearFocus()
+                binding.recyclerView.scrollToPosition(0)
+                query?.let { viewModel.filterCountries(it) }
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                viewModel.filterCountries(newText ?: "")
+                return true
+            }
+        })
     }
 
     private fun goToFavoritesList(){

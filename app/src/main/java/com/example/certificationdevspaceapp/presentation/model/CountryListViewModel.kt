@@ -18,6 +18,9 @@ class CountryListViewModel(
     private var _countries = MutableLiveData<List<CountryUiState>>()
     val countries: LiveData<List<CountryUiState>> = _countries
 
+    private val _filteredCountries = MutableLiveData<List<CountryUiState>>()
+    val filteredCountries: LiveData<List<CountryUiState>> = _filteredCountries
+
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
@@ -30,24 +33,31 @@ class CountryListViewModel(
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
-            Log.d("VIEWMODEL", "Loading countries...")
 
             val result = getAllCountriesUseCase()
             result.fold(
                 onSuccess = { list ->
-                    Log.d("VIEWMODEL", "Success: loaded ${list.size} countries")
-                    list.forEach { Log.d("COUNTRY_ITEM", "${it.name} (${it.code})") }
-
-                    _countries.value = list.map { it.toUiState() }
+                    val uiList = list.map { it.toUiState() }
+                    _countries.value = uiList
+                    _filteredCountries.value = uiList
                 },
                 onFailure = { e ->
-                    Log.e("VIEWMODEL", "Error: ${e.message}", e)
                     _error.value = e.message ?: "Unknown error"
                 }
             )
 
             _isLoading.value = false
         }
+    }
+
+    fun filterCountries(query: String) {
+        val allCountries = _countries.value ?: return
+        _filteredCountries.value =
+            if (query.isBlank()) allCountries
+            else allCountries.filter {
+                it.name.contains(query, ignoreCase = true) ||
+                        it.region.contains(query, ignoreCase = true)
+            }
     }
 
     fun toggleFavorite(item: CountryUiState) {
@@ -58,6 +68,7 @@ class CountryListViewModel(
                 it.copy(isFavorite = newState)
             } else it
         }.orEmpty()
+        filterCountries("")
     }
 
     fun getFavoriteList(): List<CountryUiState> {

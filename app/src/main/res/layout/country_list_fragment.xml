@@ -38,7 +38,7 @@
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:background="@drawable/bg_rounded_search_bar"
-        app:iconifiedByDefault="false"
+        app:iconifiedByDefault="true"
         android:layout_margin="8dp"
         app:queryHint="@string/hint_country_search"
         app:layout_constraintEnd_toEndOf="parent"
