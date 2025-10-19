@@ -3,8 +3,10 @@ package com.example.certificationdevspaceapp.domain.model
 import com.example.certificationdevspaceapp.data.model.CountryDto
 
 fun CountryDto.toDomain(): CountryDomain {
-    val language = languages?.values?.firstOrNull() ?: "Unknown"
-    val currency = currencies?.values?.firstOrNull()?.name ?: "Unknown"
+    val language = languages?.values?.joinToString(", ") ?: "Unknown"
+    val currency = currencies?.values
+        ?.joinToString(", ") { "${it.name ?: "Unknown"} (${it.symbol ?: ""})" }
+        ?: "Unknown"
 
     return CountryDomain(
         name = name.common,

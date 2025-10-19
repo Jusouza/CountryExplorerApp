@@ -82,6 +82,8 @@ class CountryListViewModel(
         flagUrl = flagUrl,
         population = population,
         code = code,
+        language = language,
+        currency = currency,
         isFavorite = favorites.contains(code)
     )
 }

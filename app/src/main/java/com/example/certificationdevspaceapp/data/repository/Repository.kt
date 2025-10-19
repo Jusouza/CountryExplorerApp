@@ -8,11 +8,11 @@ class Repository(private val api: Api) {
     suspend fun getAllCountries(): List<CountryDto> =
         api.getAllCountries()
 
-    suspend fun getCountryByCode(code: String): CountryDto? {
-        val url =
-            "https://restcountries.com/v3.1/alpha/$code?fields=name,capital,flags,region,languages,currencies,population,cca2,cca3"
-        Log.d("Repository", "Full URL: $url")
-        return api.getCountryByCode(url)
-    }
+    suspend fun getCountryByCode(code: String): CountryDto? =
+        try {
+            api.getCountryByCode(code)
+        } catch (e: Exception) {
+            null
+        }
 
 }

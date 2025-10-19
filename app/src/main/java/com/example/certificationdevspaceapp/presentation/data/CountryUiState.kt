@@ -6,6 +6,8 @@ data class CountryUiState(
     val region: String,
     val flagUrl: String,
     val population: Long,
+    val language: String,
+    val currency: String,
     val code: String,
     val isFavorite: Boolean = false
 )
