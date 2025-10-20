@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
@@ -17,6 +18,7 @@ import com.example.certificationdevspaceapp.domain.ViewModelFactory
 import com.example.certificationdevspaceapp.domain.usecase.GetAllCountriesUseCase
 import com.example.certificationdevspaceapp.domain.usecase.GetCountryByCodeUseCase
 import com.example.certificationdevspaceapp.presentation.adapter.CountryListAdapter
+import com.example.certificationdevspaceapp.presentation.data.CountryListState
 import com.example.certificationdevspaceapp.presentation.model.CountryListViewModel
 
 class FavoritesListFragment : Fragment() {
@@ -65,7 +67,6 @@ class FavoritesListFragment : Fragment() {
             },
             onFavoriteClick = { country ->
                 viewModel.toggleFavorite(country)
-                adapter.submitList(viewModel.getFavoriteList())
             }
         )
 
@@ -75,12 +76,16 @@ class FavoritesListFragment : Fragment() {
     }
 
     private fun observeFavorites() {
-        viewModel.countries.observe(viewLifecycleOwner) { allCountries ->
-            val favorites = allCountries.filter { it.isFavorite }
-            adapter.submitList(favorites)
-            Log.d("FAVORITES", "Favorites updated: ${favorites.size} items")
+        viewModel.uiState.observe(viewLifecycleOwner) { state ->
+            if (state is CountryListState.Success) {
+                val favorites = state.data.filter { it.isFavorite }
+                binding.recyclerView.isVisible = favorites.isNotEmpty()
+                binding.emptyStateText.isVisible = favorites.isEmpty()
+                adapter.submitList(favorites)
+            }
         }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

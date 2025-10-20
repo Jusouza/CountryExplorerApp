@@ -8,4 +8,13 @@
     <string name="label_population">Population</string>
     <string name="label_language">Language</string>
     <string name="label_currency">Currency</string>
+
+    <string name="empty_favorites_message">Ops… no favorite country yet</string>
+    <string name="err_no_internet_title">No connection</string>
+    <string name="err_no_internet_msg">Check your internet connection and try again.</string>
+    <string name="err_http_title">Problem with request</string>
+    <string name="err_http_msg">Code %1$d. Please try again.</string>
+    <string name="err_unknown_title">Oops, something went wrong</string>
+    <string name="err_unknown_msg">Try again in a moment.</string>
+    <string name="try_again_button">Try again</string>
 </resources>

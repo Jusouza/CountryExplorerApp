@@ -21,6 +21,8 @@ import com.example.certificationdevspaceapp.domain.ViewModelFactory
 import com.example.certificationdevspaceapp.domain.usecase.GetAllCountriesUseCase
 import com.example.certificationdevspaceapp.domain.usecase.GetCountryByCodeUseCase
 import com.example.certificationdevspaceapp.presentation.adapter.CountryListAdapter
+import com.example.certificationdevspaceapp.presentation.data.CountryListState
+import com.example.certificationdevspaceapp.presentation.data.ErrorKind
 import com.example.certificationdevspaceapp.presentation.model.CountryListViewModel
 
 class CountryListFragment : Fragment() {
@@ -53,7 +55,8 @@ class CountryListFragment : Fragment() {
         goToFavoritesList()
         observeUiState()
 
-        if (viewModel.countries.value.isNullOrEmpty()) {
+        val state = viewModel.uiState.value
+        if (state !is CountryListState.Success || state.data.isEmpty()) {
             viewModel.loadCountries()
         }
     }
@@ -76,20 +79,46 @@ class CountryListFragment : Fragment() {
     }
 
     private fun observeUiState() {
-        viewModel.countries.observe(viewLifecycleOwner) { countries ->
-            adapter.submitList(countries)
-        }
+        viewModel.uiState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is CountryListState.Loading -> {
+                    binding.progressBar.isVisible = true
+                    binding.recyclerView.isVisible = false
+                    binding.errorContainer.isVisible = false
+                }
+                is CountryListState.Success -> {
+                    binding.progressBar.isVisible = false
+                    binding.errorContainer.isVisible = false
+                    binding.recyclerView.isVisible = true
+                    adapter.submitList(state.data)
+                }
+                is CountryListState.Error -> {
+                    binding.progressBar.isVisible = false
+                    binding.recyclerView.isVisible = false
+                    binding.errorContainer.isVisible = true
 
-        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            binding.progressBar.isVisible = isLoading
-        }
-
-        viewModel.error.observe(viewLifecycleOwner) { error ->
-            if (error != null) {
-                Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
+                    val (title, msg) = when (state.kind) {
+                        ErrorKind.NO_INTERNET ->
+                            getString(R.string.err_no_internet_title) to
+                                    getString(R.string.err_no_internet_msg)
+                        ErrorKind.HTTP -> {
+                            val code = state.httpCode ?: 0
+                            getString(R.string.err_http_title) to
+                                    getString(R.string.err_http_msg, code)
+                        }
+                        ErrorKind.UNKNOWN ->
+                            getString(R.string.err_unknown_title) to
+                                    getString(R.string.err_unknown_msg)
+                    }
+                    binding.errorTitle.text = title
+                    binding.errorMessage.text = msg
+                }
             }
         }
+
+        binding.retryButton.setOnClickListener { viewModel.loadCountries() }
     }
+
 
     private fun setupSearchBar() {
         val searchView = binding.searchView
