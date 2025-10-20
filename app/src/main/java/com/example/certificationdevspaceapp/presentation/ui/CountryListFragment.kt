@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,18 +23,25 @@ import com.example.certificationdevspaceapp.domain.usecase.GetCountryByCodeUseCa
 import com.example.certificationdevspaceapp.presentation.adapter.CountryListAdapter
 import com.example.certificationdevspaceapp.presentation.model.CountryListViewModel
 
-class CountryListFragment: Fragment() {
+class CountryListFragment : Fragment() {
     private var _binding: CountryListFragmentBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var viewModel: CountryListViewModel
+    private val viewModel: CountryListViewModel by activityViewModels {
+        val api = RetrofitClient.api
+        val repository = Repository(api)
+        val getAllCountriesUseCase = GetAllCountriesUseCase(repository)
+        val getCountryByCodeUseCase = GetCountryByCodeUseCase(repository)
+        ViewModelFactory(getAllCountriesUseCase, getCountryByCodeUseCase)
+    }
+
     private lateinit var adapter: CountryListAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        _binding = CountryListFragmentBinding.inflate(inflater, container,false)
+    ): View {
+        _binding = CountryListFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -43,26 +51,16 @@ class CountryListFragment: Fragment() {
         setupRecycler()
         setupSearchBar()
         goToFavoritesList()
-        setupViewModel()
         observeUiState()
 
-        viewModel.loadCountries()
+        if (viewModel.countries.value.isNullOrEmpty()) {
+            viewModel.loadCountries()
+        }
     }
 
-    private fun setupViewModel() {
-        val api = RetrofitClient.api
-        val repository = Repository(api)
-        val getAllCountriesUseCase = GetAllCountriesUseCase(repository)
-        val getCountryByCodeUseCase = GetCountryByCodeUseCase(repository)
-
-        val factory = ViewModelFactory(getAllCountriesUseCase, getCountryByCodeUseCase)
-        viewModel = ViewModelProvider(this, factory)[CountryListViewModel::class.java]
-    }
     private fun setupRecycler() {
         adapter = CountryListAdapter(
             onItemClick = { country ->
-                Log.d("DEBUG_CODE", "Country clicked: ${country.name} -> ${country.code}")
-
                 val action = CountryListFragmentDirections
                     .actionCountryListFragmentToCountryDetailFragment(country.code)
                 findNavController().navigate(action)
@@ -78,7 +76,7 @@ class CountryListFragment: Fragment() {
     }
 
     private fun observeUiState() {
-        viewModel.filteredCountries.observe(viewLifecycleOwner) { countries ->
+        viewModel.countries.observe(viewLifecycleOwner) { countries ->
             adapter.submitList(countries)
         }
 
@@ -110,12 +108,11 @@ class CountryListFragment: Fragment() {
         })
     }
 
-    private fun goToFavoritesList(){
+    private fun goToFavoritesList() {
         binding.btnFavorite.setOnClickListener {
             findNavController().navigate(R.id.action_countryListFragment_to_favoritesListFragment)
         }
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

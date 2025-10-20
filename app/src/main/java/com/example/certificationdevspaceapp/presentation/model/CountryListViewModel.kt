@@ -61,18 +61,22 @@ class CountryListViewModel(
     }
 
     fun toggleFavorite(item: CountryUiState) {
-        _countries.value = _countries.value?.map {
+        val currentList = _countries.value ?: return
+        val updatedList = currentList.map {
             if (it.code == item.code) {
                 val newState = !it.isFavorite
                 if (newState) favorites.add(it.code) else favorites.remove(it.code)
                 it.copy(isFavorite = newState)
             } else it
-        }.orEmpty()
-        filterCountries("")
+        }
+
+        _countries.value = updatedList.toList()
+        Log.d("FAVORITES", "Toggled ${item.name} -> now favorite=${!item.isFavorite}")
+
     }
 
     fun getFavoriteList(): List<CountryUiState> {
-        return _countries.value?.filter { it.isFavorite } ?: emptyList()
+        return _countries.value?.filter { favorites.contains(it.code) } ?: emptyList()
     }
 
     private fun CountryDomain.toUiState() = CountryUiState(

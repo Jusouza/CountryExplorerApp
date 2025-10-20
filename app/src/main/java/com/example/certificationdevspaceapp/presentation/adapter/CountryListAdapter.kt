@@ -1,8 +1,9 @@
 package com.example.certificationdevspaceapp.presentation.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.certificationdevspaceapp.R
@@ -12,14 +13,14 @@ import com.example.certificationdevspaceapp.presentation.data.CountryUiState
 class CountryListAdapter(
     private val onItemClick: (CountryUiState) -> Unit,
     private val onFavoriteClick: (CountryUiState) -> Unit
-) : RecyclerView.Adapter<CountryListAdapter.CountryViewHolder>() {
+) : ListAdapter<CountryUiState, CountryListAdapter.CountryViewHolder>(DiffCallback) {
 
-    private val items = mutableListOf<CountryUiState>()
+    object DiffCallback : DiffUtil.ItemCallback<CountryUiState>() {
+        override fun areItemsTheSame(oldItem: CountryUiState, newItem: CountryUiState) =
+            oldItem.code == newItem.code
 
-    fun submitList(newList: List<CountryUiState>) {
-        items.clear()
-        items.addAll(newList)
-        notifyDataSetChanged()
+        override fun areContentsTheSame(oldItem: CountryUiState, newItem: CountryUiState) =
+            oldItem == newItem
     }
 
     inner class CountryViewHolder(private val binding: ItemListBinding)
@@ -28,7 +29,6 @@ class CountryListAdapter(
         fun bind(item: CountryUiState) {
             binding.countryNameTv.text = item.name
             binding.continentTv.text = item.capital
-            Log.d("ADAPTER", "Binding ${item.name} (${item.code})")
 
             Glide.with(binding.root)
                 .load(item.flagUrl)
@@ -45,15 +45,11 @@ class CountryListAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CountryViewHolder {
-        val binding = ItemListBinding.inflate(
-            LayoutInflater.from(parent.context), parent, false
-        )
+        val binding = ItemListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return CountryViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: CountryViewHolder, position: Int) {
-        holder.bind(items[position])
+        holder.bind(getItem(position))
     }
-
-    override fun getItemCount() = items.size
 }
