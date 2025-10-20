@@ -131,7 +131,11 @@ class CountryListFragment : Fragment() {
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                viewModel.filterCountries(newText ?: "")
+                viewModel.filterCountries(newText.orEmpty())
+
+                if (newText.isNullOrEmpty()) {
+                    binding.recyclerView.smoothScrollToPosition(0)
+                }
                 return true
             }
         })
